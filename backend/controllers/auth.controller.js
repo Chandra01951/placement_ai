@@ -21,9 +21,9 @@ exports.register = async (req, res, next) => {
       emailVerificationToken: verificationToken,
     });
 
-    // Send verification email
+    // Send verification email (non-blocking)
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-    await sendEmail({
+    sendEmail({
       to: email,
       subject: 'Welcome to PlacementAI – Verify your email',
       html: `<h2>Hi ${name}!</h2><p>Please verify your email: <a href="${verifyUrl}">Verify Email</a></p>`,
