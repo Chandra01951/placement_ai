@@ -42,6 +42,8 @@ const corsOptions = {
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Socket.io setup
@@ -49,6 +51,7 @@ const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
@@ -59,10 +62,11 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 
-// Middleware
-app.use(helmet());
-app.use(morgan('dev'));
+// CORS must come before helmet
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api', limiter);
