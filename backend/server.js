@@ -62,6 +62,9 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 
+// Trust Railway/Vercel reverse proxy
+app.set('trust proxy', 1);
+
 // CORS must come before helmet
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
