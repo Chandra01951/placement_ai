@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const { Readable } = require('stream');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,38 +8,38 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Resume storage
-const resumeStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'placementai/resumes',
-    allowed_formats: ['pdf', 'docx', 'doc'],
-    resource_type: 'raw',
+// Use memory storage instead of cloudinary storage (avoids v1/v2 conflict)
+const uploadResume = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    cb(null, allowed.includes(file.mimetype));
   },
 });
 
-// Profile picture storage
-const profileStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'placementai/profiles',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 400, height: 400, crop: 'fill' }],
+const uploadProfile = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    cb(null, file.mimetype.startsWith('image/'));
   },
 });
 
-// Certificate storage
-const certificateStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'placementai/certificates',
-    allowed_formats: ['pdf', 'jpg', 'jpeg', 'png'],
-    resource_type: 'auto',
-  },
+const uploadCertificate = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-const uploadResume = multer({ storage: resumeStorage, limits: { fileSize: 10 * 1024 * 1024 } });
-const uploadProfile = multer({ storage: profileStorage, limits: { fileSize: 5 * 1024 * 1024 } });
-const uploadCertificate = multer({ storage: certificateStorage, limits: { fileSize: 10 * 1024 * 1024 } });
+// Upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+    Readable.from(buffer).pipe(stream);
+  });
+};
 
-module.exports = { cloudinary, uploadResume, uploadProfile, uploadCertificate };
+module.exports = { cloudinary, uploadResume, uploadProfile, uploadCertificate, uploadToCloudinary };

@@ -1,8 +1,8 @@
 const Resume = require('../models/resume.model');
 const User = require('../models/user.model');
 const { getAIResponse } = require('../utils/ai');
+const { uploadToCloudinary } = require('../config/cloudinary');
 const pdfParse = require('pdf-parse');
-const axios = require('axios');
 
 // @desc  Upload & Analyze Resume
 // @route POST /api/resume/upload
@@ -12,15 +12,23 @@ exports.uploadResume = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a resume file' });
     }
 
-    const { path: fileUrl, filename, originalname, mimetype } = req.file;
+    const { buffer, originalname } = req.file;
     const fileType = originalname.split('.').pop().toLowerCase();
+
+    // Upload to Cloudinary
+    const cloudResult = await uploadToCloudinary(buffer, {
+      folder: 'placementai/resumes',
+      resource_type: 'raw',
+      public_id: `resume_${Date.now()}`,
+    });
+    const fileUrl = cloudResult.secure_url;
+    const filename = cloudResult.public_id;
 
     // Extract text from PDF
     let extractedText = '';
     if (fileType === 'pdf') {
       try {
-        const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-        const pdfData = await pdfParse(Buffer.from(response.data));
+        const pdfData = await pdfParse(buffer);
         extractedText = pdfData.text;
       } catch (err) {
         console.error('PDF parse error:', err.message);
