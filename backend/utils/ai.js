@@ -19,6 +19,7 @@ const getAIResponse = async (prompt) => {
       return result.response.text();
     } catch (err) {
       console.error('Gemini error:', err.message);
+      throw new Error(`AI error: ${err.message}`);
     }
   }
 
@@ -38,6 +39,7 @@ const getAIResponse = async (prompt) => {
     }
   }
 
+  console.error('GEMINI_API_KEY set:', !!process.env.GEMINI_API_KEY);
   throw new Error('No AI provider available. Please set GEMINI_API_KEY or OPENAI_API_KEY');
 };
 
