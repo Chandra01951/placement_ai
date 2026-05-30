@@ -44,7 +44,9 @@ Return JSON:
   "score": 85
 }`;
     const aiResp = await getAIResponse(prompt);
-    const analysis = JSON.parse(aiResp.replace(/```json|```/g, '').trim());
+    const start = aiResp.indexOf('{');
+    const end = aiResp.lastIndexOf('}');
+    const analysis = JSON.parse(aiResp.slice(start, end + 1));
     res.json({ success: true, analysis });
   } catch (err) { next(err); }
 });
