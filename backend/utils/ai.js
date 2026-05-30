@@ -1,66 +1,47 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-let genAI;
-if (process.env.GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+let groq;
+if (process.env.GROQ_API_KEY) {
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 }
 
-/**
- * Get AI response using Gemini (primary) or OpenAI (fallback)
- * @param {string} prompt
- * @returns {Promise<string>}
- */
 const getAIResponse = async (prompt) => {
-  // Try Gemini first
-  if (genAI) {
+  if (groq) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContent(prompt);
-      return result.response.text();
+      const completion = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000,
+        temperature: 0.7,
+      });
+      return completion.choices[0].message.content;
     } catch (err) {
-      console.error('Gemini error:', err.message);
+      console.error('Groq error:', err.message);
       throw new Error(`AI error: ${err.message}`);
     }
   }
 
-  // Try OpenAI fallback
-  if (process.env.OPENAI_API_KEY) {
-    try {
-      const OpenAI = require('openai');
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 2000,
-      });
-      return completion.choices[0].message.content;
-    } catch (err) {
-      console.error('OpenAI error:', err.message);
-    }
-  }
-
-  console.error('GEMINI_API_KEY set:', !!process.env.GEMINI_API_KEY);
-  throw new Error('No AI provider available. Please set GEMINI_API_KEY or OPENAI_API_KEY');
+  throw new Error('No AI provider available. Please set GROQ_API_KEY');
 };
 
-/**
- * Stream AI response
- */
 const streamAIResponse = async (prompt, onChunk) => {
-  if (genAI) {
+  if (groq) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContentStream(prompt);
-      for await (const chunk of result.stream) {
-        const text = chunk.text();
+      const stream = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000,
+        stream: true,
+      });
+      for await (const chunk of stream) {
+        const text = chunk.choices[0]?.delta?.content || '';
         if (text) onChunk(text);
       }
       return;
     } catch (err) {
-      console.error('Gemini stream error:', err.message);
+      console.error('Groq stream error:', err.message);
     }
   }
-  // Fallback: non-streaming
   const response = await getAIResponse(prompt);
   onChunk(response);
 };
