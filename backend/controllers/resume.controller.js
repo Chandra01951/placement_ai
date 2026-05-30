@@ -18,7 +18,7 @@ exports.uploadResume = async (req, res, next) => {
     // Upload to Cloudinary
     const cloudResult = await uploadToCloudinary(buffer, {
       folder: 'placementai/resumes',
-      resource_type: 'raw',
+      resource_type: 'auto',
       public_id: `resume_${Date.now()}`,
     });
     const fileUrl = cloudResult.secure_url;
