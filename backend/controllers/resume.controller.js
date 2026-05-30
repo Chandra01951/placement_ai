@@ -69,7 +69,9 @@ Return ONLY valid JSON.`;
 
     try {
       const aiResponse = await getAIResponse(aiPrompt);
-      const parsed = JSON.parse(aiResponse.replace(/```json|```/g, '').trim());
+      const start = aiResponse.indexOf('{');
+      const end = aiResponse.lastIndexOf('}');
+      const parsed = JSON.parse(aiResponse.slice(start, end + 1));
       atsScore = parsed.atsScore || atsScore;
       resumeScore = parsed.resumeScore || resumeScore;
       grammarScore = parsed.grammarScore || grammarScore;

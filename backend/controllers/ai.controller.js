@@ -1,6 +1,13 @@
 const { getAIResponse, streamAIResponse } = require('../utils/ai');
 const User = require('../models/user.model');
 
+const extractJSON = (text) => {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('No JSON found in AI response');
+  return JSON.parse(text.slice(start, end + 1));
+};
+
 // @desc  AI Career Advisor
 // @route POST /api/ai/career-advice
 exports.getCareerAdvice = async (req, res, next) => {
@@ -37,7 +44,7 @@ Return JSON:
 Return only valid JSON.`;
 
     const aiResponse = await getAIResponse(prompt);
-    const parsed = JSON.parse(aiResponse.replace(/```json|```/g, '').trim());
+    const parsed = extractJSON(aiResponse);
 
     res.json({ success: true, advice: parsed });
   } catch (error) {
@@ -95,7 +102,7 @@ Return JSON:
 }`;
 
     const aiResponse = await getAIResponse(prompt);
-    const parsed = JSON.parse(aiResponse.replace(/```json|```/g, '').trim());
+    const parsed = extractJSON(aiResponse);
 
     res.json({ success: true, analysis: parsed });
   } catch (error) {
@@ -129,7 +136,7 @@ Return JSON:
 }`;
 
     const aiResponse = await getAIResponse(prompt);
-    const parsed = JSON.parse(aiResponse.replace(/```json|```/g, '').trim());
+    const parsed = extractJSON(aiResponse);
 
     res.json({ success: true, prediction: parsed });
   } catch (error) {
@@ -186,7 +193,7 @@ Return JSON:
 }`;
 
     const aiResponse = await getAIResponse(prompt);
-    const challenge = JSON.parse(aiResponse.replace(/```json|```/g, '').trim());
+    const challenge = extractJSON(aiResponse);
 
     res.json({ success: true, challenge: { ...challenge, topic, difficulty, date: today } });
   } catch (error) {
