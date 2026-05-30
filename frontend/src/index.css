@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  
+  :root {
+    --gradient-primary: linear-gradient(135deg, #0a70df 0%, #28a5fd 100%);
+    --gradient-accent: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+    --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --card-bg: rgba(30, 36, 51, 0.8);
+    --border: rgba(255,255,255,0.06);
+  }
+
+  html { scroll-behavior: smooth; }
+  
+  body {
+    background: #0d1117;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(10, 112, 223, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(40, 165, 253, 0.06) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+  
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0d1117; }
+  ::-webkit-scrollbar-thumb { background: #28a5fd33; border-radius: 3px; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-2;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-surface-800/80 backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6;
+  }
+  
+  .card-hover {
+    @apply card hover:border-primary-500/30 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 cursor-pointer;
+  }
+  
+  .input-field {
+    @apply w-full bg-surface-900 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/30 transition-all;
+  }
+  
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .badge-primary { @apply badge bg-primary-500/20 text-primary-400; }
+  .badge-success { @apply badge bg-emerald-500/20 text-emerald-400; }
+  .badge-warning { @apply badge bg-orange-500/20 text-orange-400; }
+  .badge-danger  { @apply badge bg-red-500/20 text-red-400; }
+  
+  .score-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+  
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 text-sm font-medium;
+  }
+  
+  .nav-link.active {
+    @apply text-primary-400 bg-primary-500/10 border border-primary-500/20;
+  }
+  
+  .section-heading {
+    @apply text-2xl font-bold font-display text-white;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+  }
+  
+  .stat-card {
+    @apply card flex items-center gap-4;
+  }
+  
+  .progress-bar {
+    @apply h-2 bg-surface-900 rounded-full overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+}
+
+/* Code editor theme */
+.code-area {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: #0a0e17;
+  color: #e6edf3;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  resize: vertical;
+  min-height: 300px;
+  width: 100%;
+  outline: none;
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1e2433 25%, #2a3347 50%, #1e2433 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* Score circle */
+.score-circle-bg { stroke: rgba(255,255,255,0.05); }
+.score-circle-fill { 
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease-in-out;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
